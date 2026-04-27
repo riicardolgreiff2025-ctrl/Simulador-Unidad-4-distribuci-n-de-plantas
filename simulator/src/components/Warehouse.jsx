@@ -386,9 +386,8 @@ export function ToBeWarehouse() {
       {/* AGV Transfer Point (Bottom Left) */}
       <ZoneTape position={[-29, 0, 6]} size={[10, 8]} color="#facc15" />
       <Text position={[-29, 0.05, 6]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.4} color="#facc15" anchorX="center">
-        SISTEMA ROBÓTICO DE CLASIFICACIÓN
+        SISTEMA DE CLASIFICACIÓN
       </Text>
-      <RoboticArm position={[-29, 0, 6]} />
       
       <DockDoor position={[-35, 0, -hh]} rotation={[0, 0, 0]} label="RECIBO 1" color="#64748b" />
       <DockDoor position={[-25, 0, -hh]} rotation={[0, 0, 0]} label="RECIBO 2" color="#64748b" />
