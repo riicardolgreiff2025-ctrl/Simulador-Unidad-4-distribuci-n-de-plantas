@@ -394,15 +394,8 @@ export function ToBeWarehouse() {
       <DockDoor position={[-25, 0, -hh]} rotation={[0, 0, 0]} label="RECIBO 2" color="#64748b" />
 
       {/* ── ROBOTIC ARMS IN STORAGE AISLES (pick from shelves → AGV) ── */}
-      {/* Zone C aisles — 2 arms */}
-      <RoboticArm position={[-10, 0, -17]} rotation={[0,  Math.PI / 4, 0]} />
-      <RoboticArm position={[  0, 0, -17]} rotation={[0, -Math.PI / 4, 0]} />
-      {/* Zone B aisles — 2 arms */}
+      {/* Solo 1 brazo robótico en el almacén como se solicitó */}
       <RoboticArm position={[-10, 0,  -2]} rotation={[0,  Math.PI / 4, 0]} />
-      <RoboticArm position={[  5, 0,  -2]} rotation={[0, -Math.PI / 4, 0]} />
-      {/* Zone A aisles — 2 arms */}
-      <RoboticArm position={[-10, 0,  13]} rotation={[0,  Math.PI / 4, 0]} />
-      <RoboticArm position={[  5, 0,  13]} rotation={[0, -Math.PI / 4, 0]} />
 
       {/* ── 2. ALMACENAMIENTO ABC (CENTER) ── */}
       {/* Zone Backgrounds */}

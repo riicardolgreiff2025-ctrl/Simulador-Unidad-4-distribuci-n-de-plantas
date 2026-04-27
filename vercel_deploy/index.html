@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador 3D de Distribución de Planta – TecnoLogística S.A.</title>
+  <meta name="description" content="Simulador 3D interactivo de distribución de planta para TecnoLogística S.A. Explora los escenarios AS-IS y TO-BE con visualización en tiempo real de flujos, AGVs y brazos robóticos." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --blue-glow: rgba(37,99,235,.45);
+      --white: #ffffff;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #000;
+      color: var(--white);
+      overflow: hidden;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── CAROUSEL ── */
+    #carousel {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      pointer-events: none;
+    }
+
+    .slide.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* Cambiado de cover para que se vea la imagen completa */
+      object-position: center;
+      display: block;
+      padding: 40px; /* Margen interno para que la imagen no toque los bordes */
+    }
+
+    /* ── OVERLAY (minimal — branding only) ── */
+    #overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: clamp(40px, 7vh, 80px);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #branding {
+      position: absolute;
+      top: clamp(20px, 4vh, 48px);
+      left: clamp(20px, 4vw, 60px);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      pointer-events: none;
+    }
+
+    #branding-icon {
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1;
+    }
+
+    #branding-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #branding-title {
+      font-size: clamp(13px, 1.6vw, 20px);
+      font-weight: 700;
+      letter-spacing: .03em;
+      text-shadow: 0 2px 8px rgba(0,0,0,.6);
+    }
+
+    #branding-sub {
+      font-size: clamp(10px, 1vw, 13px);
+      font-weight: 300;
+      color: rgba(255,255,255,.7);
+      text-shadow: 0 1px 4px rgba(0,0,0,.6);
+    }
+
+    /* ── BOTTOM CONTENT ── */
+    #bottom-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      pointer-events: auto;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    #explore-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: clamp(12px, 1.6vh, 18px) clamp(28px, 4vw, 52px);
+      background: var(--blue);
+      color: #fff;
+      font-family: inherit;
+      font-size: clamp(14px, 1.4vw, 18px);
+      font-weight: 700;
+      letter-spacing: .04em;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 0 32px var(--blue-glow), 0 4px 16px rgba(0,0,0,.5);
+      transition: background .2s, box-shadow .2s, transform .15s;
+    }
+
+    #explore-btn:hover {
+      background: var(--blue-dark);
+      box-shadow: 0 0 48px var(--blue-glow), 0 6px 24px rgba(0,0,0,.6);
+      transform: translateY(-2px);
+    }
+
+    #explore-btn:active {
+      transform: translateY(0);
+    }
+
+    #explore-btn svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* ── CAROUSEL INDICATORS ── */
+    #indicators {
+      position: absolute;
+      bottom: clamp(16px, 2.5vh, 28px);
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 20;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.4);
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: background .3s, transform .3s;
+    }
+
+    .dot.active {
+      background: #fff;
+      transform: scale(1.35);
+    }
+
+    /* ── ARROW CONTROLS ── */
+    .arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 20;
+      background: rgba(0,0,0,.28);
+      border: 1.5px solid rgba(255,255,255,.18);
+      color: #fff;
+      width: clamp(38px, 4vw, 52px);
+      height: clamp(38px, 4vw, 52px);
+      border-radius: 50%;
+      font-size: clamp(16px, 2vw, 22px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s;
+      backdrop-filter: blur(4px);
+    }
+
+    .arrow:hover { background: rgba(37,99,235,.5); }
+    #prev-btn { left: clamp(12px, 2vw, 28px); }
+    #next-btn { right: clamp(12px, 2vw, 28px); }
+  </style>
+</head>
+<body>
+
+<section id="hero" role="banner" aria-label="Presentación del Simulador 3D">
+
+  <!-- Carousel -->
+  <div id="carousel" aria-live="polite">
+    <div class="slide active"><img src="https://res.cloudinary.com/djgg2qnhd/image/upload/v1777310720/1_mfzwdl.png"  alt="Vista 1 – Simulador de Planta" loading="eager" /></div>
+    <div class="slide"><img src="https://res.cloudinary.com/djgg2qnhd/image/upload/v1777310732/2_zysysb.png"  alt="Vista 2 – Almacenamiento AS-IS" loading="lazy" /></div>
+    <div class="slide"><img src="https://res.cloudinary.com/djgg2qnhd/image/upload/v1777310731/3_xrrhiw.png"  alt="Vista 3 – Flujo de materiales" loading="lazy" /></div>
+    <div class="slide"><img src="https://res.cloudinary.com/djgg2qnhd/image/upload/v1777310727/4_xxc570.png"  alt="Vista 4 – Zona de picking" loading="lazy" /></div>
+    <div class="slide"><img src="https://res.cloudinary.com/djgg2qnhd/image/upload/v1777310732/5_k42pse.png"  alt="Vista 5 – AGVs en acción" loading="lazy" /></div>
+    <div class="slide"><img src="https://res.cloudinary.com/djgg2qnhd/image/upload/v1777310723/6_nusrog.png"  alt="Vista 6 – Brazos robóticos" loading="lazy" /></div>
+    <div class="slide"><img src="https://res.cloudinary.com/djgg2qnhd/image/upload/v1777310732/7_tmiwbh.png"  alt="Vista 7 – Zona de despacho" loading="lazy" /></div>
+    <div class="slide"><img src="https://res.cloudinary.com/djgg2qnhd/image/upload/v1777310728/8_sj1eiw.png"  alt="Vista 8 – TO-BE optimizado" loading="lazy" /></div>
+    <div class="slide"><img src="https://res.cloudinary.com/djgg2qnhd/image/upload/v1777310732/9_gq5omo.png"  alt="Vista 9 – Métricas KPI" loading="lazy" /></div>
+  </div>
+
+  <!-- Arrow buttons -->
+  <button class="arrow" id="prev-btn" aria-label="Imagen anterior">&#8592;</button>
+  <button class="arrow" id="next-btn" aria-label="Imagen siguiente">&#8594;</button>
+
+  <!-- Overlay: branding + CTA -->
+  <div id="overlay">
+    <div id="branding">
+      <span id="branding-icon">🏭</span>
+      <div id="branding-text">
+        <span id="branding-title">Simulador 3D – TecnoLogística S.A.</span>
+        <span id="branding-sub">Grupo B08 · Politécnico Gran Colombiano · powered by Creative AIMA</span>
+      </div>
+    </div>
+
+    <div id="bottom-content">
+      <a id="explore-btn" href="simulator/index.html" role="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        Explorar simulación
+      </a>
+    </div>
+  </div>
+
+  <!-- Dot indicators -->
+  <div id="indicators" role="tablist" aria-label="Imágenes del carrusel"></div>
+
+</section>
+
+<script>
+  const slides     = document.querySelectorAll('.slide');
+  const dotsWrap   = document.getElementById('indicators');
+  const total      = slides.length;
+  let   current    = 0;
+  let   timer      = null;
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('role', 'tab');
+    d.setAttribute('aria-label', `Imagen ${i + 1}`);
+    d.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+    d.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(d);
+  });
+
+  const dots = dotsWrap.querySelectorAll('.dot');
+
+  function goTo(idx) {
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    dots[current].setAttribute('aria-selected', 'false');
+    current = (idx + total) % total;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+    dots[current].setAttribute('aria-selected', 'true');
+    resetTimer();
+  }
+
+  function resetTimer() {
+    clearInterval(timer);
+    timer = setInterval(() => goTo(current + 1), 5000);
+  }
+
+  document.getElementById('prev-btn').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('next-btn').addEventListener('click', () => goTo(current + 1));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft')  goTo(current - 1);
+    if (e.key === 'ArrowRight') goTo(current + 1);
+  });
+
+  // Touch swipe
+  let touchX = null;
+  document.getElementById('hero').addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+  document.getElementById('hero').addEventListener('touchend',   e => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX;
+    if (Math.abs(dx) > 40) goTo(current + (dx < 0 ? 1 : -1));
+    touchX = null;
+  });
+
+  resetTimer();
+</script>
+</body>
+</html>

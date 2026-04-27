@@ -672,23 +672,16 @@ export function Truck({ groupRef }) {
         <boxGeometry args={[0.05, 3.1, 2.3]} />
         <meshStandardMaterial color="#94a3b8" />
       </mesh>
-      {/* Chassis/Wheels — front axles (single) + rear trailer axles (dual) */}
-      {/* Front cab axles: single per side */}
-      {[[-3.8, 0.4, 0.9], [-3.8, 0.4, -0.9], [-2.2, 0.4, 0.9], [-2.2, 0.4, -0.9]].map((p, i) => (
-        <mesh key={`fw${i}`} position={p} rotation={[Math.PI / 2, 0, 0]}>
+      {/* Chassis/Wheels — front axles (single) + rear trailer axles (single) */}
+      {/* Front cab axle (2 wheels) */}
+      {[[-3.8, 0.4, 0.9], [-3.8, 0.4, -0.9], 
+      /* Solo DOS llantas traseras para el remolque */
+      [4.6, 0.4, 0.9], [4.6, 0.4, -0.9]].map((p, i) => (
+        <mesh key={`w${i}`} position={p} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.45, 0.45, 0.4, 12]} />
           <meshStandardMaterial color="#0f172a" />
         </mesh>
       ))}
-      {/* Rear trailer axles: dual wheels (inner + outer per side) */}
-      {[0, 1.2, 3, 4.2, 5.2].map((rx, ai) =>
-        [0.82, 1.18, -0.82, -1.18].map((rz, wi) => (
-          <mesh key={`rw${ai}-${wi}`} position={[rx, 0.4, rz]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.45, 0.45, 0.35, 12]} />
-            <meshStandardMaterial color="#0f172a" />
-          </mesh>
-        ))
-      )}
     </group>
   );
 }
